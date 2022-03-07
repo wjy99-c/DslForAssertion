@@ -79,6 +79,7 @@ target/
 
 # IPython
 profile_default/
+.idea/
 ipython_config.py
 
 # pyenv
