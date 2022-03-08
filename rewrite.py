@@ -8,42 +8,58 @@ from pygccxml import utils
 from pygccxml import declarations
 from pygccxml import parser
 import castxml
+import sys
+import clang.cindex
+
+
+def rewrite(line_number_queue, original_code_path: str, generated_code_path: str, generate_kernel_code: str):
+    f = open(original_code_path, "r")
+    wf = open(generated_code_path, "w")
+
+    for i, line in enumerate(f):
+        if i == line_number_queue[0]:
+            wf.write(line)
+            wf.write(generate_kernel_code)
+        else:
+            wf.write(generate_kernel_code)
 
 if __name__ == '__main__':
     # Find out the c++ parser
-    generator_path, generator_name = utils.find_xml_generator()
+    function_calls = []  # List of AST node objects that are function calls
+    function_declarations = []  # List of AST node objects that are fucntion declarations
 
-    # Configure the xml generator
-    xml_generator_config = parser.xml_generator_configuration_t(
-        xml_generator_path=generator_path,
-        xml_generator=generator_name)
+    # Traverse the AST tree
 
-    # The c++ file we want to parse
-    filename = "example_program/example.hpp"
+    def traverse(node):
 
-    decls = parser.parse([filename], xml_generator_config)
-    global_namespace = declarations.get_global_namespace(decls)
-    ns = global_namespace.namespace("ns")
+        # Recurse for children of this node
+        for child in node.get_children():
+            traverse(child)
 
-    # The variables() method will return a list of variables.
-    # We know that the c variable is the third one in the list:
-    c = ns.variables()[2]
-    print("My name is: " + c.name)
-    print("My type is: " + str(c.decl_type))
-    print("My value is: " + c.value)
+        # Add the node to function_calls
+        if node.kind == clang.cindex.CursorKind.CALL_EXPR:
+            function_calls.append(node)
 
-    # Of course you can also loop over the list and look for the right name
-    for var in ns.variables():
-        if var.name == "c":
-            print("My name is: " + var.name)
-            print("My type is: " + str(var.decl_type))
-            print("My value is: " + var.value)
+        # Add the node to function_declarations
+        if node.kind == clang.cindex.CursorKind.FUNCTION_DECL:
+            function_declarations.append(node)
 
-    # One way to get a variable is to use the variable() method and
-    # a lambda function. This is the most flexible way as you can implement
-    # your own lambda function to filter out variables following your
-    # specific criteria.
-    c = ns.variable(lambda v: v.name == "c")
-    print("My name is: " + c.name)
-    print("My type is: " + str(c.decl_type))
-    print("My value is: " + c.value)
+        # Print out information about the node
+        print('Found %s  type=%s [line=%s, col=%s]' % (
+            node.displayname, node.kind, node.location.line, node.location.column))
+
+
+    # Tell clang.cindex where libclang.dylib is
+    clang.cindex.Config.set_library_path(
+        "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/")
+    index = clang.cindex.Index.create()
+
+    # Generate AST from filepath passed in the command line
+    tu = index.parse("example_program/test.cpp")
+
+    root = tu.cursor  # Get the root of the AST
+    traverse(root)
+
+    # Print the contents of function_calls and function_declarations
+    print(function_calls)
+    print(function_declarations)
