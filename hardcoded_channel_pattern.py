@@ -6,23 +6,25 @@
 
 class ChannelsCodePattern:
     kernel_code = ""
-    outside_code_read = ""
 
-    def __init__(self, channel_name: str):
+    def __init__(self, channel_name: str, item=1):
+        self.outside_channel_size = ""
         self.outside_code_def = "struct DeviceToHostSideChannelID;\n"
         self.channel_name = channel_name
         self.outside_code_def = self.outside_code_def + "using " + self.channel_name + "= DeviceToHostSideChannel" \
                                                                                        "<DeviceToHostSideChannelID," \
                                                                                        " int, true, 8>;\n "
-        self.outside_code_read = "  for (int i = 0; i < channel_sum[0]; i++) {\n " \
+        self.outside_code_read = "  for (int i = 0; i < channel_num[" + str(item - 1) + "]; i++) {\n " \
                                  "      interested = 1;\n" \
                                  "      std::cout<<\"start reading....\";\n" \
                                  "      flag[i] = " + self.channel_name + "::read();\n" \
-                                                                          "      std::cout<<flag[i]<<\" find an overflow!\";\n" \
-                                                                          "      std::cout<<\"read success.\";\n" \
-                                                                          "      if (flag[i]==-1){break;}\n" \
-                                                                          "}\n" \
-                                                                          "  std::cout<<\"finish reading...\";\n"
+                                 "      std::cout<<flag[i]<<\" find an overflow!\";\n" \
+                                 "      std::cout<<\"read success.\";\n" \
+                                 "      if (flag[i]==-1){break;}\n" \
+                                 "}\n" \
+                                 "  std::cout<<\"finish reading...\";\n"
+        self.outside_channel_size_code = "buffer channel_buf(channel_num.data(), num_channel);\n"  # num_channel undone
+        self.inside_kernel_channel_size_code = "accessor channel_sum(channel_buf, h, write_only, 0)\n"
 
     def kernel_channel_ef(self) -> str:
         return self.kernel_code
@@ -31,7 +33,13 @@ class ChannelsCodePattern:
         return self.outside_code_def
 
     def outside_channel_read(self) -> str:
-        return self.outside_code_def
+        return self.outside_code_read
+
+    def outside_channel_size_code(self) -> str:
+        return self.outside_channel_size_code
+
+    def inside_channel_size_code(self) -> str:
+        return self.inside_kernel_channel_size_code
 
 
 # TODO UNTESTED

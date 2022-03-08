@@ -4,14 +4,11 @@
 # @Author  : Jiyuan Wang
 # @File    : rewrite.py
 
-from pygccxml import utils
-from pygccxml import declarations
-from pygccxml import parser
-import castxml
 import sys
 import clang.cindex
 
 
+# TODO UNDONE
 def rewrite(line_number_queue, original_code_path: str, generated_code_path: str, generate_kernel_code: str):
     f = open(original_code_path, "r")
     wf = open(generated_code_path, "w")
@@ -23,10 +20,12 @@ def rewrite(line_number_queue, original_code_path: str, generated_code_path: str
         else:
             wf.write(generate_kernel_code)
 
+
 if __name__ == '__main__':
     # Find out the c++ parser
     function_calls = []  # List of AST node objects that are function calls
     function_declarations = []  # List of AST node objects that are fucntion declarations
+
 
     # Traverse the AST tree
 
