@@ -8,7 +8,6 @@ class ChannelsCodePattern:
     kernel_code = ""
 
     def __init__(self, channel_name: str, item=1):
-        self.outside_channel_size = ""
         self.outside_code_def = "struct DeviceToHostSideChannelID;\n"
         self.channel_name = channel_name
         self.outside_code_def = self.outside_code_def + "using " + self.channel_name + "= DeviceToHostSideChannel" \
@@ -26,7 +25,7 @@ class ChannelsCodePattern:
         self.outside_channel_size_code = "buffer channel_buf(channel_num.data(), num_channel);\n"  # num_channel undone
         self.inside_kernel_channel_size_code = "accessor channel_sum(channel_buf, h, write_only, 0)\n"
 
-    def kernel_channel_ef(self) -> str:
+    def kernel_channel_code(self) -> str:
         return self.kernel_code
 
     def outside_channel_def(self) -> str:

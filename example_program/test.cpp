@@ -20,7 +20,7 @@ int main(int argc, char const *argv[])
 void foo(int a[], int b[], int N) {
   if (a[0] > 1)
   {
-    b[0] = 2 + a[0];
+    b[0] = a[0] + a[0];
   }
   else
   {
