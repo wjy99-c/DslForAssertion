@@ -61,6 +61,7 @@ def _get_binop_operator(cursor, target_operator):
 def traverse(node, target_operator):  # only for overflow
 
     target_variable_location = []
+
     # Recurse for children of this node
     for child in node.get_children():
         traverse(child, target_operator)
@@ -75,6 +76,9 @@ def traverse(node, target_operator):  # only for overflow
     if node.kind == clang.cindex.CursorKind.DECL_REF_EXPR:
         if node.spelling == "sum":  # should be target variable
             target_variable_location.append(node.location.line)
+
+    if node.spelling == "Kerenel start... \n":
+        kernel_start.append(node.location.line)
 
     # Print out information about the node
     if node.kind in [clang.cindex.CursorKind.BINARY_OPERATOR]:
@@ -93,6 +97,7 @@ if __name__ == '__main__':
     function_declarations = []  # List of AST node objects that are function declarations
     outside_kernel_inside_job = []
     inside_kernel_assert_location = []
+    kernel_start = []
 
     # Traverse the AST tree
 
@@ -102,7 +107,7 @@ if __name__ == '__main__':
     index = clang.cindex.Index.create()
 
     # Generate AST from filepath passed in the command line
-    tu = index.parse("example_program/overflow.cpp")
+    tu = index.parse("example_program/vectoradd.cpp")
 
     root = tu.cursor  # Get the root of the AST
     traverse(root, "+")
