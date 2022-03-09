@@ -60,22 +60,28 @@ def _get_binop_operator(cursor, target_operator):
 
 def traverse(node, target_operator):  # only for overflow
 
+    target_variable_location = []
     # Recurse for children of this node
     for child in node.get_children():
         traverse(child, target_operator)
-
-    # Add the node to function_calls
-    if node.kind == clang.cindex.CursorKind.CALL_EXPR:
-        function_calls.append(node)
 
     # Add the node to function_declarations
     if node.kind == clang.cindex.CursorKind.FUNCTION_DECL:
         function_declarations.append(node)
 
+    if node.kind == clang.cindex.CursorKind.RETURN_STMT:
+        outside_kernel_inside_job.append(node.location.line)
+
+    if node.kind == clang.cindex.CursorKind.DECL_REF_EXPR:
+        if node.spelling == "sum":  # should be target variable
+            target_variable_location.append(node.location.line)
+
     # Print out information about the node
     if node.kind in [clang.cindex.CursorKind.BINARY_OPERATOR]:
         if _get_binop_operator(node, target_operator) is not None:
             print('Found %s' % _get_binop_operator(node, target_operator).spelling)
+            if node.location.line in target_variable_location:
+                inside_kernel_assert_location.append(node.location.line)
 
     print('Found %s  type=%s [line=%s, col=%s]' % (
         node.spelling, node.kind, node.location.line, node.location.column))
@@ -85,6 +91,8 @@ if __name__ == '__main__':
     # Find out the c++ parser
     function_calls = []  # List of AST node objects that are function calls
     function_declarations = []  # List of AST node objects that are function declarations
+    outside_kernel_inside_job = []
+    inside_kernel_assert_location = []
 
     # Traverse the AST tree
 
@@ -100,5 +108,6 @@ if __name__ == '__main__':
     traverse(root, "+")
 
     # Print the contents of function_calls and function_declarations
-    print(function_calls)
+    print(outside_kernel_inside_job)
+    print(inside_kernel_assert_location)
     print(function_declarations)

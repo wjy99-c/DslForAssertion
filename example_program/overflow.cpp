@@ -44,6 +44,7 @@ int VectorAdd(queue &q, const IntVector &a_vector, const IntVector &b_vector,
   q.wait();
   std::cout<<sum_parallel[0]<<" Overflow were found.\n";
 
+  interested = 2;
 
   return interested;
 
