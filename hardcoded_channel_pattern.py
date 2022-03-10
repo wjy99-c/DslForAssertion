@@ -14,14 +14,14 @@ class ChannelsCodePattern:
                                                                                        "<DeviceToHostSideChannelID," \
                                                                                        " int, true, 8>;\n "
         self.outside_code_read = "  for (int i = 0; i < channel_num[" + str(item - 1) + "]; i++) {\n " \
-                                 "      interested = 1;\n" \
-                                 "      std::cout<<\"start reading....\";\n" \
-                                 "      flag[i] = " + self.channel_name + "::read();\n" \
-                                 "      std::cout<<flag[i]<<\" find an overflow!\";\n" \
-                                 "      std::cout<<\"read success.\";\n" \
-                                 "      if (flag[i]==-1){break;}\n" \
-                                 "}\n" \
-                                 "  std::cout<<\"finish reading...\";\n"
+                                                                                        "      interested = 1;\n" \
+                                                                                        "      std::cout<<\"start reading....\";\n" \
+                                                                                        "      flag[i] = " + self.channel_name + "::read();\n" \
+                                                                                                                                 "      std::cout<<flag[i]<<\" find a violation!\";\n" \
+                                                                                                                                 "      std::cout<<\"read success.\";\n" \
+                                                                                                                                 "      if (flag[i]==-1){break;}\n" \
+                                                                                                                                 "}\n" \
+                                                                                                                                 "  std::cout<<\"finish reading...\";\n"
         self.outside_channel_size_code = "buffer channel_buf(channel_num.data(), num_channel);\n"  # num_channel undone
         self.inside_kernel_channel_size_code = "accessor channel_sum(channel_buf, h, write_only, 0)\n"
 
@@ -54,17 +54,23 @@ class OverflowPattern(ChannelsCodePattern):
                                                                            "} \n"
 
 
-# TODO UNDONE
 class ArrayOutOfSizePattern(ChannelsCodePattern):
 
-    def __init__(self):
+    def __init__(self, access_variable: str, boundary: str):
         channel_name = "MyDeviceToHostSideChannel_Array"
         super(ArrayOutOfSizePattern, self).__init__(channel_name)
+        self.kernel_code = "if  (" + access_variable + ">" + boundary + ") {\n " \
+                                                                        "   bool flag=true;\n " \
+                                                                        "   " + self.channel_name + "::write(i," \
+                                                                                                    "flag);\n " \
+                                                                        "    channel_sum[1] = channel_sum[1] + 1\n" \
+                                                                                                    "} \n"
 
 
 # TODO UNDONE
 class HangPattern(ChannelsCodePattern):
 
     def __init__(self):
-        channel_name = "MyDeviceToHostSideChannel_Hang"
+        channel_name = "MyDeviceToHostSideChannel_Hang" # only check the channel hang
         super(HangPattern, self).__init__(channel_name)
+        self.kernel_code = ""

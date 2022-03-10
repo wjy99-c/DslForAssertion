@@ -71,13 +71,14 @@ def traverse(node, target_operator):  # only for overflow
         function_declarations.append(node)
 
     if node.kind == clang.cindex.CursorKind.RETURN_STMT:
-        outside_kernel_inside_job.append(node.location.line)
+        outside_kernel_inside_job.append(node.location.line)  # place to add "channel read"
 
     if node.kind == clang.cindex.CursorKind.DECL_REF_EXPR:
-        if node.spelling == "sum":  # should be target variable
+        if node.spelling == "sum":  # should be the target variable, place to add kernel channel write. However,
+            # seems AST compilation is impossible to get into kernel code
             target_variable_location.append(node.location.line)
 
-    if node.spelling == "Kerenel start... \n":
+    if node.spelling == "Kernel start... \n":
         kernel_start.append(node.location.line)
 
     # Print out information about the node
@@ -116,3 +117,5 @@ if __name__ == '__main__':
     print(outside_kernel_inside_job)
     print(inside_kernel_assert_location)
     print(function_declarations)
+
+    line_number_queue =
