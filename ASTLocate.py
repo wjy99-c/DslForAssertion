@@ -118,4 +118,4 @@ if __name__ == '__main__':
     print(inside_kernel_assert_location)
     print(function_declarations)
 
-    line_number_queue =
+    #line_number_queue =
