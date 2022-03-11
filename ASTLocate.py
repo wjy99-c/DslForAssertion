@@ -7,32 +7,7 @@
 import sys
 import clang.cindex
 import hardcoded_channel_pattern
-
-
-# TODO UNDONE
-def rewrite(line_number_queue, original_code_path: str, generated_code_path: str,
-            generate_code_pattern: hardcoded_channel_pattern.ChannelsCodePattern):
-    f = open(original_code_path, "r")
-    wf = open(generated_code_path, "w")
-
-    for i, line in enumerate(f):
-        if i == line_number_queue[0]:
-            wf.write(line)
-            wf.write(generate_code_pattern.outside_code_def)
-        elif i == line_number_queue[1]:
-            wf.write(line)
-            wf.write(generate_code_pattern.outside_channel_size_code())
-        elif i == line_number_queue[2]:
-            wf.write(line)
-            wf.write(generate_code_pattern.inside_kernel_channel_size_code())
-        elif i == line_number_queue[3]:
-            wf.write(line)
-            wf.write(generate_code_pattern.kernel_channel_code())
-        elif i == line_number_queue[4]:
-            wf.write(line)
-            wf.write(generate_code_pattern.outside_channel_read())
-        else:
-            wf.write(line)
+import rewrite
 
 
 def _get_binop_operator(cursor, target_operator):
@@ -71,14 +46,14 @@ def traverse(node, target_operator):  # only for overflow
         function_declarations.append(node)
 
     if node.kind == clang.cindex.CursorKind.RETURN_STMT:
-        outside_kernel_inside_job.append(node.location.line)  # place to add "channel read"
+        outside_kernel.append(node.location.line)  # place to add "channel read"
 
     if node.kind == clang.cindex.CursorKind.DECL_REF_EXPR:
         if node.spelling == "sum":  # should be the target variable, place to add kernel channel write. However,
             # seems AST compilation is impossible to get into kernel code
             target_variable_location.append(node.location.line)
 
-    if node.spelling == "Kernel start... \n":
+    if node.spelling.find("Kernel start") != -1:
         kernel_start.append(node.location.line)
 
     # Print out information about the node
@@ -96,7 +71,7 @@ if __name__ == '__main__':
     # Find out the c++ parser
     function_calls = []  # List of AST node objects that are function calls
     function_declarations = []  # List of AST node objects that are function declarations
-    outside_kernel_inside_job = []
+    outside_kernel = []
     inside_kernel_assert_location = []
     kernel_start = []
 
@@ -114,8 +89,13 @@ if __name__ == '__main__':
     traverse(root, "+")
 
     # Print the contents of function_calls and function_declarations
-    print(outside_kernel_inside_job)
+    print(outside_kernel)
     print(inside_kernel_assert_location)
-    print(function_declarations)
 
-    #line_number_queue =
+    line_number_queue = [0, kernel_start[0], kernel_start[0] + 2, kernel_start[0] + 10, outside_kernel[0]]
+
+    trial = hardcoded_channel_pattern.OverflowPattern("sum")
+
+    rewrite.rewrite(line_number_queue, "example_program/1.cpp", "example_program/11.cpp", trial)
+
+# kernel_start[0]+10 should be inside_kernel_assert_location[0]; kernel_start[0] + 2 should be q.submit

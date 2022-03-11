@@ -15,13 +15,13 @@ def rewrite(line_number_queue, original_code_path: str, generated_code_path: str
     for i, line in enumerate(f):
         if i == line_number_queue[0]:
             wf.write(line)
-            wf.write(generate_code_pattern.outside_code_def)
+            wf.write(generate_code_pattern.outside_channel_def())
         elif i == line_number_queue[1]:
             wf.write(line)
-            wf.write(generate_code_pattern.outside_channel_size_code())
+            wf.write(generate_code_pattern.outside_channel_size())
         elif i == line_number_queue[2]:
             wf.write(line)
-            wf.write(generate_code_pattern.inside_kernel_channel_size_code())
+            wf.write(generate_code_pattern.accessor_channel())
         elif i == line_number_queue[3]:
             wf.write(line)
             wf.write(generate_code_pattern.kernel_channel_code())

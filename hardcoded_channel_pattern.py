@@ -34,10 +34,10 @@ class ChannelsCodePattern:
     def outside_channel_read(self) -> str:
         return self.outside_code_read
 
-    def outside_channel_size_code(self) -> str:
+    def outside_channel_size(self) -> str:
         return self.outside_channel_size_code
 
-    def inside_channel_size_code(self) -> str:
+    def accessor_channel(self) -> str:
         return self.inside_kernel_channel_size_code
 
 
