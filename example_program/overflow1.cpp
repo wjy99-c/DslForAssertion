@@ -1,7 +1,5 @@
 
-struct DeviceToHostSideChannelID;
-using MyDeviceToHostSideChannel_Overflow= DeviceToHostSideChannel<DeviceToHostSideChannelID, int, true, 8>;
- #include <CL/sycl.hpp>
+#include <CL/sycl.hpp>
 #include <vector>
 #include <iostream>
 #include <string>
@@ -33,15 +31,6 @@ static auto exception_handler = [](sycl::exception_list e_list) {
       std::cout << "Failure" << std::endl;
 #endif
       std::terminate();
-  for (int i = 0; i < channel_num[0]; i++) {
-       interested = 1;
-      std::cout<<"start reading....";
-      flag[i] = MyDeviceToHostSideChannel_Overflow::read();
-      std::cout<<flag[i]<<" find a violation!";
-      std::cout<<"read success.";
-      if (flag[i]==-1){break;}
-}
-  std::cout<<"finish reading...";
     }
   }
 };
@@ -67,10 +56,8 @@ int VectorAdd(queue &q, const IntVector &a_vector, const IntVector &b_vector,
   // data access permission and device computation (kernel).
   std::cout << "Kernel start... \n";
   q.submit([&](handler &h) {
-buffer channel_buf(channel_num.data(), num_channel);
     // Create an accessor for each buffer with access permission: read, write or
     // read/write. The accessor is a mean to access the memory in the buffer.
-accessor channel_sum(channel_buf, h, write_only, 0)
     accessor a(a_buf, h, read_only);
     accessor b(b_buf, h, read_only);
 
@@ -79,22 +66,12 @@ accessor channel_sum(channel_buf, h, write_only, 0)
     //accessor flag_kernel(f_buf, h, write_only, no_init);
     // Use parallel_for to run vector addition in parallel on device. This
     // executes the kernel.
-if (sum[i]<0){
-    bool flag=true;
-    MyDeviceToHostSideChannel_Overflow::write(i,flag);
-     channel_sum[0] = channel_sum[0] + 1
-} 
     //    1st parameter is the number of work items.
     //    2nd parameter is the kernel, a lambda that specifies what to do per
     //    work item. The parameter of the lambda is the work item id.
     // DPC++ supports unnamed lambda kernel by default.
 
     h.parallel_for(num_items, [=](auto i) { sum[i] = a[i] + b[i];
-                                            if (sum[i]<0){
-                                                bool flag=true;
-                                                MyDeviceToHostSideChannel::write(i,flag); //Undo, write need to be cleaned out. Right now can only store for 8 overflow.
-                                                if (flag) {sum[0]=sum[0]+1;}
-                                                }
                                           }
                   );
 

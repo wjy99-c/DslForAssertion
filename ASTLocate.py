@@ -81,9 +81,9 @@ if __name__ == '__main__':
     clang.cindex.Config.set_library_path(
         "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/")
     index = clang.cindex.Index.create()
-
+    original_code_path = "example_program/overflow1.cpp"
     # Generate AST from filepath passed in the command line
-    tu = index.parse("example_program/vectoradd.cpp")
+    tu = index.parse(original_code_path)
 
     root = tu.cursor  # Get the root of the AST
     traverse(root, "+")
@@ -91,11 +91,17 @@ if __name__ == '__main__':
     # Print the contents of function_calls and function_declarations
     print(outside_kernel)
     print(inside_kernel_assert_location)
+    if len(inside_kernel_assert_location) == 0:
+        f = open(original_code_path, "r")
+        for i, line in enumerate(f):
+            if line.find("+") != -1 and line.find("sum[") != -1:
+                print(line)
+                inside_kernel_assert_location.append(i)
 
-    line_number_queue = [0, kernel_start[0], kernel_start[0] + 2, kernel_start[0] + 10, outside_kernel[0]]
-
+    line_number_queue = [0, kernel_start[0], kernel_start[0] + 2, inside_kernel_assert_location[0], outside_kernel[0]]
+    print(inside_kernel_assert_location[0])
     trial = hardcoded_channel_pattern.OverflowPattern("sum")
 
-    rewrite.rewrite(line_number_queue, "example_program/1.cpp", "example_program/11.cpp", trial)
+    rewrite.rewrite(line_number_queue, "example_program/overflow1.cpp", "example_program/overflow11.cpp", trial)
 
-# kernel_start[0]+10 should be inside_kernel_assert_location[0]; kernel_start[0] + 2 should be q.submit
+#kernel_start[0] + 2 should be q.submit
