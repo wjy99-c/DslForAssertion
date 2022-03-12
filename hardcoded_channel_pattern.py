@@ -23,7 +23,7 @@ class ChannelsCodePattern:
                                                                                                                                  "}\n" \
                                                                                                                                  "  std::cout<<\"finish reading...\";\n"
         self.outside_channel_size_code = "buffer channel_buf(channel_num.data(), num_channel);\n"  # num_channel undone
-        self.inside_kernel_channel_size_code = "accessor channel_sum(channel_buf, h, write_only, 0)\n"
+        self.inside_kernel_channel_size_code = "accessor channel_sum(channel_buf, h, write_only, 0);\n"
 
     def kernel_channel_code(self) -> str:
         return self.kernel_code
@@ -58,12 +58,12 @@ class ArrayOutOfSizePattern(ChannelsCodePattern):
 
     def __init__(self, access_variable: str, boundary: str):
         channel_name = "MyDeviceToHostSideChannel_Array"
-        super(ArrayOutOfSizePattern, self).__init__(channel_name)
+        super(ArrayOutOfSizePattern, self).__init__(channel_name, item=2)
         self.kernel_code = "if  (" + access_variable + ">" + boundary + ") {\n " \
                                                                         "   bool flag=true;\n " \
                                                                         "   " + self.channel_name + "::write(i," \
                                                                                                     "flag);\n " \
-                                                                        "    channel_sum[1] = channel_sum[1] + 1\n" \
+                                                                        "    channel_sum[1] = channel_sum[1] + 1;\n" \
                                                                                                     "} \n"
 
 
@@ -72,5 +72,5 @@ class HangPattern(ChannelsCodePattern):
 
     def __init__(self):
         channel_name = "MyDeviceToHostSideChannel_Hang" # only check the channel hang
-        super(HangPattern, self).__init__(channel_name)
+        super(HangPattern, self).__init__(channel_name, item=3)
         self.kernel_code = ""

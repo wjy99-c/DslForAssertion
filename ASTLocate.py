@@ -45,7 +45,7 @@ def traverse(node, target_operator):  # only for overflow
     if node.kind == clang.cindex.CursorKind.FUNCTION_DECL:
         function_declarations.append(node)
 
-    if node.kind == clang.cindex.CursorKind.RETURN_STMT:
+    if node.spelling=="interested" and node.kind == clang.cindex.CursorKind.DECL_REF_EXPR:
         outside_kernel.append(node.location.line)  # place to add "channel read"
 
     if node.kind == clang.cindex.CursorKind.DECL_REF_EXPR:
@@ -74,6 +74,8 @@ if __name__ == '__main__':
     outside_kernel = []
     inside_kernel_assert_location = []
     kernel_start = []
+    target_variable = "sum"
+    target_operator = "i"
 
     # Traverse the AST tree
 
@@ -86,7 +88,7 @@ if __name__ == '__main__':
     tu = index.parse(original_code_path)
 
     root = tu.cursor  # Get the root of the AST
-    traverse(root, "+")
+    traverse(root, target_operator)
 
     # Print the contents of function_calls and function_declarations
     print(outside_kernel)
@@ -94,14 +96,16 @@ if __name__ == '__main__':
     if len(inside_kernel_assert_location) == 0:
         f = open(original_code_path, "r")
         for i, line in enumerate(f):
-            if line.find("+") != -1 and line.find("sum[") != -1:
+            if line.find(target_operator) != -1 and line.find(target_variable+"[") != -1:
                 print(line)
                 inside_kernel_assert_location.append(i)
 
     line_number_queue = [0, kernel_start[0], kernel_start[0] + 2, inside_kernel_assert_location[0], outside_kernel[0]]
-    print(inside_kernel_assert_location[0])
-    trial = hardcoded_channel_pattern.OverflowPattern("sum")
+    # trial = hardcoded_channel_pattern.OverflowPattern(target_variable)
+    trial = hardcoded_channel_pattern.ArrayOutOfSizePattern(target_operator, "num_item")
 
-    rewrite.rewrite(line_number_queue, "example_program/overflow1.cpp", "example_program/overflow11.cpp", trial)
+    # rewrite.rewrite(line_number_queue, "example_program/overflow1.cpp", "example_program/overflow11.cpp", trial)
+    rewrite.rewrite(line_number_queue, "example_program/arraysize1.cpp", "example_program/arraysize2.cpp", trial)
 
-#kernel_start[0] + 2 should be q.submit
+
+# kernel_start[0] + 2 should be q.submit
