@@ -14,12 +14,12 @@ class ChannelsCodePattern:
                                                                                        "<DeviceToHostSideChannelID," \
                                                                                        " int, true, 8>;\n "
         self.outside_code_read = "  for (int i = 0; i < channel_num[" + str(item - 1) + "]; i++) {\n " \
-                                                                                        "      interested = 1;\n" \
                                                                                         "      std::cout<<\"start reading....\";\n" \
                                                                                         "      flag[i] = " + self.channel_name + "::read();\n" \
                                                                                                                                  "      std::cout<<flag[i]<<\" find a violation!\";\n" \
                                                                                                                                  "      std::cout<<\"read success.\";\n" \
                                                                                                                                  "      if (flag[i]==-1){break;}\n" \
+                                                                                                                                 "      interested = 1;\n" \
                                                                                                                                  "}\n" \
                                                                                                                                  "  std::cout<<\"finish reading...\";\n"
         self.outside_channel_size_code = "buffer channel_buf(channel_num.data(), num_channel);\n"  # num_channel undone
@@ -63,14 +63,26 @@ class ArrayOutOfSizePattern(ChannelsCodePattern):
                                                                         "   bool flag=true;\n " \
                                                                         "   " + self.channel_name + "::write(i," \
                                                                                                     "flag);\n " \
-                                                                        "    channel_sum[1] = channel_sum[1] + 1;\n" \
+                                                                                                    "    channel_sum[1] = channel_sum[1] + 1;\n" \
                                                                                                     "} \n"
+
+
+class ChannelSizePattern(ChannelsCodePattern):
+
+    def __init__(self, target_channel: str):
+        channel_name = "MyDeviceToHostSideChannel_Channel"
+        super(ChannelSizePattern, self).__init__(channel_name, item=3)
+        self.kernel_code = "bool flag_channel=true;\n" + target_channel + "::write(5,flag_channel);\n if (" \
+                                                                          "!flag_channel) {bool flag=true;\n " \
+                                                                          "   " + self.channel_name + "::write(i,flag);\n " \
+                                                                                                      "    channel_sum[2] = channel_sum[2] + 1;\n" \
+                                                                                                      "} \n"
 
 
 # TODO UNDONE
 class HangPattern(ChannelsCodePattern):
 
     def __init__(self):
-        channel_name = "MyDeviceToHostSideChannel_Hang" # only check the channel hang
-        super(HangPattern, self).__init__(channel_name, item=3)
+        channel_name = "MyDeviceToHostSideChannel_Hang"  # only check the channel hang
+        super(HangPattern, self).__init__(channel_name, item=4)
         self.kernel_code = ""
