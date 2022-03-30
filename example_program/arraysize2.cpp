@@ -1,6 +1,6 @@
 
 struct DeviceToHostSideChannelID;
-using MyDeviceToHostSideChannel_Array= DeviceToHostSideChannel<DeviceToHostSideChannelID, int, true, 8>;
+using MyDeviceToHostSideChannel_Overflow= DeviceToHostSideChannel<DeviceToHostSideChannelID, int, true, 8>;
  #include <CL/sycl.hpp>
 #include <vector>
 #include <iostream>
@@ -76,10 +76,10 @@ accessor channel_sum(channel_buf, h, write_only, 0);
     // DPC++ supports unnamed lambda kernel by default.
 
     h.parallel_for(num_items, [=](auto i) { sum[i] = a[i] + b[i];
-if  (i>num_item) {
+if (sum[i]<0 and a[i]>0 and b[i]> 0){
     bool flag=true;
-    MyDeviceToHostSideChannel_Array::write(i,flag);
-     channel_sum[1] = channel_sum[1] + 1;
+    MyDeviceToHostSideChannel_Overflow::write(i,flag);
+     channel_sum[0] = channel_sum[0] + 1;
 } 
                                           }
                   );
@@ -107,13 +107,13 @@ if  (i>num_item) {
 
   return interested;
 
-  for (int i = 0; i < channel_num[1]; i++) {
-       interested = 1;
-      std::cout<<"start reading....";
-      flag[i] = MyDeviceToHostSideChannel_Array::read();
+  for (int i = 0; i < channel_num[0]; i++) {
+       std::cout<<"start reading....";
+      flag[i] = MyDeviceToHostSideChannel_Overflow::read();
       std::cout<<flag[i]<<" find a violation!";
       std::cout<<"read success.";
       if (flag[i]==-1){break;}
+      interested = 1;
 }
   std::cout<<"finish reading...";
 }

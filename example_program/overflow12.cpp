@@ -1,5 +1,7 @@
 
 struct DeviceToHostSideChannelID;
+using MyDeviceToHostSideChannel_Channel= DeviceToHostSideChannel<DeviceToHostSideChannelID, int, true, 8>;
+ struct DeviceToHostSideChannelID;
 using MyDeviceToHostSideChannel_Overflow= DeviceToHostSideChannel<DeviceToHostSideChannelID, int, true, 8>;
  #include <CL/sycl.hpp>
 #include <vector>
@@ -56,8 +58,10 @@ int VectorAdd(queue &q, const IntVector &a_vector, const IntVector &b_vector,
 
   // Submit a command group to the queue by a lambda function that contains the
   // data access permission and device computation (kernel).
+buffer channel_buf(channel_num.data(), num_channel);
   std::cout << "Kernel start... \n";
   q.submit([&](handler &h) {
+accessor channel_sum(channel_buf, h, write_only, 0);
 buffer channel_buf(channel_num.data(), num_channel);
     // Create an accessor for each buffer with access permission: read, write or
     // read/write. The accessor is a mean to access the memory in the buffer.
@@ -80,6 +84,12 @@ if (sum[i]<0){
     bool flag=true;
     MyDeviceToHostSideChannel_Overflow::write(i,flag);
      channel_sum[0] = channel_sum[0] + 1;
+bool flag_channel=true;
+MyDeviceToHostSideChannel_Overflow::write(5,flag_channel);
+ if (!flag_channel) {bool flag=true;
+    MyDeviceToHostSideChannel_Channel::write(i,flag);
+     channel_sum[2] = channel_sum[2] + 1;
+} 
 } 
                                           }
                   );
@@ -98,6 +108,15 @@ if (sum[i]<0){
             std::cout<<"start reading.\n";
             flag[i] = MyDeviceToHostSideChannel::read();
             std::cout<<flag[i]<<" find an overflow\n";
+  for (int i = 0; i < channel_num[2]; i++) {
+       std::cout<<"start reading....";
+      flag[i] = MyDeviceToHostSideChannel_Channel::read();
+      std::cout<<flag[i]<<" find a violation!";
+      std::cout<<"read success.";
+      if (flag[i]==-1){break;}
+      interested = 1;
+}
+  std::cout<<"finish reading...";
 
             std::cout<<"read success.\n";
             if (flag[i]==-1){break;}

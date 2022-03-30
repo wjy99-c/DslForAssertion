@@ -47,7 +47,7 @@ class OverflowPattern(ChannelsCodePattern):
     def __init__(self, variable: str):
         channel_name = "MyDeviceToHostSideChannel_Overflow"
         super(OverflowPattern, self).__init__(channel_name)
-        self.kernel_code = "if (" + variable + "[i]<0){\n " \
+        self.kernel_code = "if (" + variable + "[i]<0 and a[i]>0 and b[i]> 0){\n " \
                                                "   bool flag=true;\n " \
                                                "   " + self.channel_name + "::write(i,flag);\n " \
                                                                            "    channel_sum[0] = channel_sum[0] + 1;\n" \

@@ -49,7 +49,7 @@ def traverse(node, target_operator):  # only for overflow
         outside_kernel.append(node.location.line)  # place to add "channel read"
 
     if node.kind == clang.cindex.CursorKind.DECL_REF_EXPR:
-        if node.spelling == "sum":  # should be the target variable, place to add kernel channel write. However,
+        if node.spelling == "MyDeviceToHostSideChannel_Channel":  # change to "sum" should be the target variable, place to add kernel channel write. However,
             # seems AST compilation is impossible to get into kernel code
             target_variable_location.append(node.location.line)
 
@@ -74,8 +74,9 @@ if __name__ == '__main__':
     outside_kernel = []
     inside_kernel_assert_location = []
     kernel_start = []
-    target_variable = "sum"
-    target_operator = "i"
+    target_variable = sys.argv[1]
+    target_operator = sys.argv[2]
+    target_type = sys.argv[3]
 
     # Traverse the AST tree
 
@@ -101,11 +102,24 @@ if __name__ == '__main__':
                 inside_kernel_assert_location.append(i)
 
     line_number_queue = [0, kernel_start[0], kernel_start[0] + 2, inside_kernel_assert_location[0], outside_kernel[0]]
-    # trial = hardcoded_channel_pattern.OverflowPattern(target_variable)
-    trial = hardcoded_channel_pattern.ArrayOutOfSizePattern(target_operator, "num_item")
 
+    print(target_type)
+    if target_type == "overflow":
+        print(target_variable)
+        trial = hardcoded_channel_pattern.OverflowPattern(target_variable)
+        rewrite.rewrite(line_number_queue, "example_program/arraysize1.cpp", "example_program/arraysize2.cpp", trial)
+    elif target_type == "arraysize":
+        trial = hardcoded_channel_pattern.ArrayOutOfSizePattern(target_operator, "num_item")
+        rewrite.rewrite(line_number_queue, "example_program/arraysize1.cpp", "example_program/arraysize2.cpp", trial)
+    elif target_type == "channel":
+        trial = hardcoded_channel_pattern.ChannelSizePattern("MyDeviceToHostSideChannel_Overflow")
+        rewrite.rewrite(line_number_queue, "example_program/overflow11.cpp", "example_program/channel1.cpp", trial)
+        print(trial.kernel_code)
+    elif target_type == "hang":
+        trial = hardcoded_channel_pattern.HangPattern()
+        rewrite.rewrite(line_number_queue, "example_program/arraysize1.cpp", "example_program/arraysize2.cpp", trial)
     # rewrite.rewrite(line_number_queue, "example_program/overflow1.cpp", "example_program/overflow11.cpp", trial)
-    rewrite.rewrite(line_number_queue, "example_program/arraysize1.cpp", "example_program/arraysize2.cpp", trial)
-
+    # rewrite.rewrite(line_number_queue, "example_program/arraysize1.cpp", "example_program/arraysize2.cpp", trial)
+    # rewrite.rewrite(line_number_queue, "example_program/overflow11.cpp", "example_program/channel1.cpp", trial)
 
 # kernel_start[0] + 2 should be q.submit
