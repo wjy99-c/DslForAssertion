@@ -74,7 +74,7 @@ if __name__ == '__main__':
     outside_kernel = []
     inside_kernel_assert_location = []
     kernel_start = []
-    with open('input.txt', 'r') as f:
+    with open(sys.argv[1], 'r') as f:
         for line in f:
             x = line.split(',')
             print(x)
@@ -88,7 +88,7 @@ if __name__ == '__main__':
     clang.cindex.Config.set_library_path(
         "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/")
     index = clang.cindex.Index.create()
-    original_code_path = "example_program/overflow1.cpp"
+    original_code_path = "example_program/overflow11.cpp"
     # Generate AST from filepath passed in the command line
     tu = index.parse(original_code_path)
 
@@ -101,7 +101,7 @@ if __name__ == '__main__':
     if len(inside_kernel_assert_location) == 0:
         f = open(original_code_path, "r")
         for i, line in enumerate(f):
-            if line.find(target_operator) != -1 and line.find(target_variable+"[") != -1:
+            if (line.find(target_operator) != -1 and line.find(target_variable+"[") != -1) or line.find(target_variable+":") != -1:
                 print(line)
                 inside_kernel_assert_location.append(i)
 
@@ -111,7 +111,7 @@ if __name__ == '__main__':
     if target_type == "overflow":
         print(target_variable)
         trial = hardcoded_channel_pattern.OverflowPattern(target_variable)
-        rewrite.rewrite(line_number_queue, "example_program/arraysize1.cpp", "example_program/arraysize2.cpp", trial)
+        rewrite.rewrite(line_number_queue, "example_program/arraysize1.cpp", "example_program/overflow2.cpp", trial)
     elif target_type == "arraysize":
         trial = hardcoded_channel_pattern.ArrayOutOfSizePattern(target_operator, "num_item")
         rewrite.rewrite(line_number_queue, "example_program/arraysize1.cpp", "example_program/arraysize2.cpp", trial)

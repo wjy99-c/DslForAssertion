@@ -11,8 +11,6 @@ def rewrite(line_number_queue, original_code_path: str, generated_code_path: str
             generate_code_pattern: hardcoded_channel_pattern.ChannelsCodePattern):
     f = open(original_code_path, "r")
     wf = open(generated_code_path, "w")
-    if generate_code_pattern.channel_name == "MyDeviceToHostSideChannel_Channel":
-        line_number_queue[3] = line_number_queue[3] + 8
     for i, line in enumerate(f):
         if i == line_number_queue[0]:
             wf.write(line)
