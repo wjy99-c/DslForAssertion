@@ -74,9 +74,13 @@ if __name__ == '__main__':
     outside_kernel = []
     inside_kernel_assert_location = []
     kernel_start = []
-    target_variable = sys.argv[1]
-    target_operator = sys.argv[2]
-    target_type = sys.argv[3]
+    with open('input.txt', 'r') as f:
+        for line in f:
+            x = line.split(',')
+            print(x)
+            target_variable = x[0]
+            target_operator = x[1]
+            target_type = x[2]
 
     # Traverse the AST tree
 
