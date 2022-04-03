@@ -76,11 +76,21 @@ if __name__ == '__main__':
     kernel_start = []
     with open(sys.argv[1], 'r') as f:
         for line in f:
-            x = line.split(',')
+            x = line.split(' ')
             print(x)
-            target_variable = x[0]
-            target_operator = x[1]
-            target_type = x[2]
+            if x[0] == "@Variable":
+                target_variable = x[1]
+            if x[0] == "@Variable":
+                target_operator = x[1]
+            if x[0] == "@Type":
+                target_type = x[1]
+            if x[0] == "@Ensure":
+                target_ensure = x
+                del target_ensure[0]
+            if x[0] == "@Requirement":
+                target_requirement = x
+                del target_requirement[0]
+
 
     # Traverse the AST tree
 
@@ -88,7 +98,7 @@ if __name__ == '__main__':
     clang.cindex.Config.set_library_path(
         "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/")
     index = clang.cindex.Index.create()
-    original_code_path = "example_program/overflow11.cpp"
+    original_code_path = "example_program/arraysize1.cpp"
     # Generate AST from filepath passed in the command line
     tu = index.parse(original_code_path)
 
@@ -101,7 +111,7 @@ if __name__ == '__main__':
     if len(inside_kernel_assert_location) == 0:
         f = open(original_code_path, "r")
         for i, line in enumerate(f):
-            if (line.find(target_operator) != -1 and line.find(target_variable+"[") != -1) or line.find(target_variable+":") != -1:
+            if (line.find(target_variable+"[") != -1) or line.find(target_variable+":") != -1:
                 print(line)
                 inside_kernel_assert_location.append(i)
 
@@ -116,7 +126,7 @@ if __name__ == '__main__':
         trial = hardcoded_channel_pattern.ArrayOutOfSizePattern(target_operator, "num_item")
         rewrite.rewrite(line_number_queue, "example_program/arraysize1.cpp", "example_program/arraysize2.cpp", trial)
     elif target_type == "channel":
-        trial = hardcoded_channel_pattern.ChannelSizePattern("MyDeviceToHostSideChannel_Overflow")
+        trial = hardcoded_channel_pattern.ChannelSizePattern(target_variable)
         rewrite.rewrite(line_number_queue, "example_program/overflow11.cpp", "example_program/channel1.cpp", trial)
         print(trial.kernel_code)
     elif target_type == "hang":

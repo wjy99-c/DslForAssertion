@@ -1,1 +1,6 @@
-sum,i,overflow,a,b
+sum,i,overflow,a,b,+
+
+@Variable sum
+@Type overflow
+@Require a[i]>0 b[i]>0 sum[i]=a[i]+b[i]
+@Ensure sum[i]>0

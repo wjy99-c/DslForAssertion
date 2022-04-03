@@ -1,1 +1,6 @@
 MyDeviceToHostSideChannel_Overflow,write,channel
+
+@Variable MyDeviceToHostSideChannel_Overflow
+@Type channel
+@Require Write
+@Ensure write success

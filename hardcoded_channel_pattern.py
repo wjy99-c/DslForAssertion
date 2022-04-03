@@ -44,27 +44,45 @@ class ChannelsCodePattern:
 # TODO UNTESTED
 class OverflowPattern(ChannelsCodePattern):
 
-    def __init__(self, variable: str):
+    def __init__(self, variable: str, require: str, ensure=None):
+        global requirements
+        if ensure is None:
+            ensure = []
+        else:
+            requirements = ""
+            for requirement in ensure:
+                requirements = requirement + "and"
+        requirements += require
         channel_name = "MyDeviceToHostSideChannel_Overflow"
         super(OverflowPattern, self).__init__(channel_name)
-        self.kernel_code = "if (" + variable + "[i]<0 and a[i]>0 and b[i]> 0){\n " \
-                                               "   bool flag=true;\n " \
-                                               "   " + self.channel_name + "::write(i,flag);\n " \
-                                                                           "    channel_sum[0] = channel_sum[0] + 1;\n" \
-                                                                           "} \n"
+
+        self.kernel_code = "if (" + requirements + "){\n " \
+                                                   "   bool flag=true;\n " \
+                                                   "   " + self.channel_name + "::write(i,flag);\n " \
+                                                                               "    channel_sum[0] = channel_sum[0] + 1;\n" \
+                                                                               "} \n"
 
 
 class ArrayOutOfSizePattern(ChannelsCodePattern):
 
-    def __init__(self, access_variable: str, boundary: str):
+    def __init__(self, access_variable: str, require: str, ensure=None):
         channel_name = "MyDeviceToHostSideChannel_Array"
+        global requirements
+        if ensure is None:
+            ensure = []
+        else:
+            requirements = ""
+            for requirement in ensure:
+                requirements = requirement + "and"
+        requirements += require
+
         super(ArrayOutOfSizePattern, self).__init__(channel_name, item=2)
-        self.kernel_code = "if  (" + access_variable + ">" + boundary + ") {\n " \
-                                                                        "   bool flag=true;\n " \
-                                                                        "   " + self.channel_name + "::write(i," \
-                                                                                                    "flag);\n " \
-                                                                                                    "    channel_sum[1] = channel_sum[1] + 1;\n" \
-                                                                                                    "} \n"
+        self.kernel_code = "if (" + requirements + ") {\n " \
+                                                   "   bool flag=true;\n " \
+                                                   "   " + self.channel_name + "::write(i," \
+                                                                               "flag);\n " \
+                                                                               "    channel_sum[1] = channel_sum[1] + 1;\n" \
+                                                                               "} \n"
 
 
 class ChannelSizePattern(ChannelsCodePattern):
