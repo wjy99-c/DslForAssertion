@@ -33,23 +33,23 @@ def _get_binop_operator(cursor, target_operator):
     return None  # pragma: no cover
 
 
-def traverse(node, target_operator):  # only for overflow
+def traverse(node, target_variable1):  # only for overflow
 
     target_variable_location = []
 
     # Recurse for children of this node
     for child in node.get_children():
-        traverse(child, target_operator)
+        traverse(child, target_variable1)
 
     # Add the node to function_declarations
     if node.kind == clang.cindex.CursorKind.FUNCTION_DECL:
         function_declarations.append(node)
 
-    if node.spelling=="interested" and node.kind == clang.cindex.CursorKind.DECL_REF_EXPR:
+    if node.spelling == "interested" and node.kind == clang.cindex.CursorKind.DECL_REF_EXPR:
         outside_kernel.append(node.location.line)  # place to add "channel read"
 
     if node.kind == clang.cindex.CursorKind.DECL_REF_EXPR:
-        if node.spelling == "MyDeviceToHostSideChannel_Channel":  # change to "sum" should be the target variable, place to add kernel channel write. However,
+        if node.spelling == target_variable1:  # change to "sum" should be the target variable, place to add kernel channel write. However,
             # seems AST compilation is impossible to get into kernel code
             target_variable_location.append(node.location.line)
 
@@ -58,13 +58,13 @@ def traverse(node, target_operator):  # only for overflow
 
     # Print out information about the node
     if node.kind in [clang.cindex.CursorKind.BINARY_OPERATOR]:
-        if _get_binop_operator(node, target_operator) is not None:
-            print('Found %s' % _get_binop_operator(node, target_operator).spelling)
+        if _get_binop_operator(node, target_variable1) is not None:
+            # print('Found %s' % _get_binop_operator(node, target_variable1).spelling)
             if node.location.line in target_variable_location:
                 inside_kernel_assert_location.append(node.location.line)
 
-    print('Found %s  type=%s [line=%s, col=%s]' % (
-        node.spelling, node.kind, node.location.line, node.location.column))
+    # print('Found %s  type=%s [line=%s, col=%s]' % (node.spelling, node.kind, node.location.line,
+    # node.location.column))
 
 
 if __name__ == '__main__':
@@ -77,23 +77,21 @@ if __name__ == '__main__':
     with open(sys.argv[1], 'r') as f:
         for line in f:
             x = line.split(' ')
-            print(x)
+
             if x[0] == "@Variable":
-                target_variable = x[1]
-            if x[0] == "@Variable":
-                target_operator = x[1]
+                target_variable = x[1][:-1]
+                print(target_variable)
             if x[0] == "@Type":
-                target_type = x[1]
+                target_type = x[1][:-1]
             if x[0] == "@Ensure":
                 target_ensure = x
                 del target_ensure[0]
-            if x[0] == "@Requirement":
+            if x[0] == "@Require":
                 target_requirement = x
                 del target_requirement[0]
 
-
     # Traverse the AST tree
-
+    print(target_requirement)
     # Tell clang.cindex where libclang.dylib is
     clang.cindex.Config.set_library_path(
         "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/")
@@ -103,7 +101,7 @@ if __name__ == '__main__':
     tu = index.parse(original_code_path)
 
     root = tu.cursor  # Get the root of the AST
-    traverse(root, target_operator)
+    traverse(root, target_variable)
 
     # Print the contents of function_calls and function_declarations
     print(outside_kernel)
@@ -111,19 +109,19 @@ if __name__ == '__main__':
     if len(inside_kernel_assert_location) == 0:
         f = open(original_code_path, "r")
         for i, line in enumerate(f):
-            if (line.find(target_variable+"[") != -1) or line.find(target_variable+":") != -1:
+            if (line.find(target_variable + "[") != -1) or line.find(target_variable + ":") != -1:
                 print(line)
                 inside_kernel_assert_location.append(i)
 
     line_number_queue = [0, kernel_start[0], kernel_start[0] + 2, inside_kernel_assert_location[0], outside_kernel[0]]
 
-    print(target_type)
+
     if target_type == "overflow":
         print(target_variable)
-        trial = hardcoded_channel_pattern.OverflowPattern(target_variable)
+        trial = hardcoded_channel_pattern.OverflowPattern(target_variable,target_ensure,target_requirement)
         rewrite.rewrite(line_number_queue, "example_program/arraysize1.cpp", "example_program/overflow2.cpp", trial)
     elif target_type == "arraysize":
-        trial = hardcoded_channel_pattern.ArrayOutOfSizePattern(target_operator, "num_item")
+        trial = hardcoded_channel_pattern.ArrayOutOfSizePattern(target_variable,target_ensure,target_requirement)
         rewrite.rewrite(line_number_queue, "example_program/arraysize1.cpp", "example_program/arraysize2.cpp", trial)
     elif target_type == "channel":
         trial = hardcoded_channel_pattern.ChannelSizePattern(target_variable)

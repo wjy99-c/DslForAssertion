@@ -44,15 +44,17 @@ class ChannelsCodePattern:
 # TODO UNTESTED
 class OverflowPattern(ChannelsCodePattern):
 
-    def __init__(self, variable: str, require: str, ensure=None):
+    def __init__(self, variable: str, ensure=None, requirement=None):
         global requirements
-        if ensure is None:
-            ensure = []
+        if requirement is None:
+            requirement = []
         else:
             requirements = ""
-            for requirement in ensure:
-                requirements = requirement + "and"
-        requirements += require
+            for requirement in requirement:
+                requirements = requirements + requirement + " and "
+            for ensures in ensure:
+                requirements = requirements + ensures
+
         channel_name = "MyDeviceToHostSideChannel_Overflow"
         super(OverflowPattern, self).__init__(channel_name)
 
@@ -65,17 +67,19 @@ class OverflowPattern(ChannelsCodePattern):
 
 class ArrayOutOfSizePattern(ChannelsCodePattern):
 
-    def __init__(self, access_variable: str, require: str, ensure=None):
-        channel_name = "MyDeviceToHostSideChannel_Array"
+    def __init__(self, variable: str, ensure=None, requirement=None):
         global requirements
-        if ensure is None:
-            ensure = []
+        if requirement is None:
+            requirement = []
         else:
             requirements = ""
-            for requirement in ensure:
-                requirements = requirement + "and"
-        requirements += require
+            for requirement in requirement:
+                requirements = requirements + requirement + " and "
+            for ensures in ensure:
+                requirements = requirement + ensures
 
+
+        channel_name = "MyDeviceToHostSideChannel_Array"
         super(ArrayOutOfSizePattern, self).__init__(channel_name, item=2)
         self.kernel_code = "if (" + requirements + ") {\n " \
                                                    "   bool flag=true;\n " \

@@ -76,7 +76,8 @@ accessor channel_sum(channel_buf, h, write_only, 0);
     // DPC++ supports unnamed lambda kernel by default.
 
     h.parallel_for(num_items, [=](auto i) { sum[i] = a[i] + b[i];
-if (sum[i]<0 and a[i]>0 and b[i]> 0){
+if (a[i]>0 and b[i]>0
+ and sum[i]>0){
     bool flag=true;
     MyDeviceToHostSideChannel_Overflow::write(i,flag);
      channel_sum[0] = channel_sum[0] + 1;
