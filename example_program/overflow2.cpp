@@ -75,13 +75,14 @@ accessor channel_sum(channel_buf, h, write_only, 0);
     //    work item. The parameter of the lambda is the work item id.
     // DPC++ supports unnamed lambda kernel by default.
 
-    h.parallel_for(num_items, [=](auto i) { sum[i] = a[i] + b[i];
-if (a[i]>0 and b[i]>0
- and sum[i]>0){
-    bool flag=true;
-    MyDeviceToHostSideChannel_Overflow::write(i,flag);
-     channel_sum[0] = channel_sum[0] + 1;
-} 
+    h.parallel_for(num_items, [=](auto i) {
+    bool flag=false;
+    if (a[i]>0 and b[i]>0) {flag=true;}
+    sum[i] = a[i] + b[i];
+    if (a[i]>0 and b[i]>0 and sum[i]>0 and flag){
+        MyDeviceToHostSideChannel_Overflow::write(i,flag);
+        channel_sum[0] = channel_sum[0] + 1;
+    }
                                           }
                   );
 

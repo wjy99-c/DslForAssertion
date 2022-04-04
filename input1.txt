@@ -1,5 +1,3 @@
-sum,i,arraysize,num_item
-
 @Variable sum
 @Type arraysize
 @Require num_item

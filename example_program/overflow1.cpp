@@ -71,6 +71,10 @@ int VectorAdd(queue &q, const IntVector &a_vector, const IntVector &b_vector,
     //    work item. The parameter of the lambda is the work item id.
     // DPC++ supports unnamed lambda kernel by default.
 
+    //@Variable sum
+    //@Type arraysize
+    //@Require num_item
+    //@Ensure i<num_item
     h.parallel_for(num_items, [=](auto i) { sum[i] = a[i] + b[i];
                                           }
                   );
