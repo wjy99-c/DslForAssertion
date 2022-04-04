@@ -72,9 +72,9 @@ int VectorAdd(queue &q, const IntVector &a_vector, const IntVector &b_vector,
     // DPC++ supports unnamed lambda kernel by default.
 
     //@Variable sum
-    //@Type arraysize
-    //@Require num_item
-    //@Ensure i<num_item
+    //@Type overflow
+    //@Require a[i]>0 b[i]>0
+    //@Ensure sum[i]>0
     h.parallel_for(num_items, [=](auto i) { sum[i] = a[i] + b[i];
                                           }
                   );
