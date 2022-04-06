@@ -1,0 +1,4 @@
+@Variable MyDeviceToHostSideChannel_Overflow
+@Type hang
+@Require read
+@Ensure

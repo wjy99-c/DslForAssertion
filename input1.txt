@@ -1,4 +1,4 @@
 @Variable sum
 @Type arraysize
-@Require num_item
+@Require
 @Ensure i<num_item
