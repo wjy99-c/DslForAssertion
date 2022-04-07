@@ -1,4 +1,4 @@
 @Variable sum
 @Type arraysize
-@Require
-@Ensure i<num_item
+@Require max_access = num_item
+@Ensure i<max_access, for all i

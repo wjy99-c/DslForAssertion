@@ -1,4 +1,7 @@
 @Variable MyDeviceToHostSideChannel_Overflow
 @Type channel
 @Require Write
-@Ensure write success
+@Ensure write success, for all write
+
+
+//application level (ex, a<10), format level (ex, fits the type), "traditional software assertion", matrix property

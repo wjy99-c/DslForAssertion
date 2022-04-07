@@ -1,0 +1,4 @@
+@Variable sum
+@Type TypeCheck
+@Require
+@Ensure sum is integer

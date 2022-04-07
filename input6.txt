@@ -1,0 +1,4 @@
+@Variable sum
+@Type MatrixCheck
+@Require
+@Ensure identity matrix

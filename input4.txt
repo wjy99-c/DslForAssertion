@@ -1,0 +1,4 @@
+@Variable sum
+@Type ValueRangeCheck
+@Require
+@Ensure sum<10000, sum>10000
