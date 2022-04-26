@@ -86,11 +86,8 @@ if __name__ == '__main__':
                 target_ensure = x
                 del target_ensure[0]
             if x[0] == "@Require" or x[0] == "@Require\n":
-                print(x[0])
                 target_requirement = x
-                print("hello")
                 del target_requirement[0]
-                print(target_requirement)
 
     # Traverse the AST tree
     # Tell clang.cindex where libclang.dylib is
@@ -128,6 +125,9 @@ if __name__ == '__main__':
         trial = hardcoded_channel_pattern.ChannelSizePattern(target_variable)
         rewrite.rewrite(line_number_queue, "example_program/overflow11.cpp", "example_program/channel1.cpp", trial)
     elif target_type == "hang":
+        trial = hardcoded_channel_pattern.HangPattern()
+        rewrite.rewrite(line_number_queue, "example_program/arraysize1.cpp", "example_program/arraysize2.cpp", trial)
+    elif target_type == "memory":
         trial = hardcoded_channel_pattern.HangPattern()
         rewrite.rewrite(line_number_queue, "example_program/arraysize1.cpp", "example_program/arraysize2.cpp", trial)
     # rewrite.rewrite(line_number_queue, "example_program/overflow1.cpp", "example_program/overflow11.cpp", trial)

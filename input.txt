@@ -1,4 +1,4 @@
-@Variable sum
+@Variable sum[i]=a[i]+b[i]
 @Type overflow
 @Require a[i]>0 b[i]>0
 @Ensure sum[i]>0
