@@ -116,7 +116,8 @@ if __name__ == '__main__':
 
     if target_type == "overflow":
         print(target_variable)
-        trial = hardcoded_channel_pattern.OverflowPattern(target_variable, target_ensure, target_requirement)
+        target_variable_list = re.split('= | \\+', target_variable)
+        trial = hardcoded_channel_pattern.OverflowPattern(target_variable_list, target_ensure, target_requirement)
         rewrite.rewrite(line_number_queue, "example_program/arraysize1.cpp", "example_program/overflow2.cpp", trial)
     elif target_type == "arraysize":
         trial = hardcoded_channel_pattern.ArrayOutOfSizePattern(target_variable, target_ensure, target_requirement)
@@ -130,6 +131,8 @@ if __name__ == '__main__':
     elif target_type == "memory":
         trial = hardcoded_channel_pattern.HangPattern()
         rewrite.rewrite(line_number_queue, "example_program/arraysize1.cpp", "example_program/arraysize2.cpp", trial)
+    elif target_type == "valuecheck":
+        trial = hardcoded_channel_pattern.HangPattern()
     # rewrite.rewrite(line_number_queue, "example_program/overflow1.cpp", "example_program/overflow11.cpp", trial)
     # rewrite.rewrite(line_number_queue, "example_program/arraysize1.cpp", "example_program/arraysize2.cpp", trial)
     # rewrite.rewrite(line_number_queue, "example_program/overflow11.cpp", "example_program/channel1.cpp", trial)

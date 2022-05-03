@@ -44,7 +44,7 @@ class ChannelsCodePattern:
 # TODO UNTESTED
 class OverflowPattern(ChannelsCodePattern):
 
-    def __init__(self, variable: str, ensure=None, requirement=None):
+    def __init__(self, variable: [], ensure=None, requirement=None):
         global requirements
         if requirement is None:
             requirement = []
@@ -61,7 +61,37 @@ class OverflowPattern(ChannelsCodePattern):
 
         channel_name = "MyDeviceToHostSideChannel_Overflow"
         super(OverflowPattern, self).__init__(channel_name)
+        self.kernel_code = "if (((" + variable[1] + ">0)and(" + variable[2] + ">0)and(" + variable[0] + "<0)) or " \
+                                                                                                        "((" + variable[
+                               1] + "<0)and(" + variable[2] + "<0)and(" + variable[0] + ">0))) " \
+                                                                                        "{\n" \
+                                                                                        "   bool flag=true;\n " \
+                                                                                        "   " + self.channel_name + "::write(i,flag);\n " \
+                                                                                                                    "    channel_sum[0] = channel_sum[0] + 1;\n" \
+                                                                                                                    "} \n"
+        # self.kernel_code = "if (not(" + requirements + ")){\n " \ "   bool flag=true;\n " \ "   " +
+        # self.channel_name + "::write(i,flag);\n " \ "    channel_sum[0] = channel_sum[0] + 1;\n" \ "} \n"
 
+
+class ValueRangePattern(ChannelsCodePattern):
+
+    def __init__(self, variable: [], ensure=None, requirement=None):
+        global requirements
+        if requirement is None:
+            requirement = []
+        else:
+            requirements = ""
+            for require in requirement:
+                requirements = requirements + require + " and "
+                print(requirements)
+            if requirements != "":
+                requirements = "not(" + requirements[:-6] + ") or "
+            print(requirements)
+            for ensures in ensure:
+                requirements = requirements + ensures
+
+        channel_name = "MyDeviceToHostSideChannel_ValueRange"
+        super(ValueRangePattern, self).__init__(channel_name)
         self.kernel_code = "if (not(" + requirements + ")){\n " \
                                                        "   bool flag=true;\n " \
                                                        "   " + self.channel_name + "::write(i,flag);\n " \
@@ -113,23 +143,22 @@ class HangPattern(ChannelsCodePattern):
         channel_name = "MyDeviceToHostSideChannel_Hang"  # only check the channel hang
         super(HangPattern, self).__init__(channel_name, item=4)
         self.kernel_code = "  timeout_counter = 0; \n" \
-                           "  if (samples_processed == frame_size) samples_processed = 0; \n"\
-                           "  while (timeout_counter <= kTimeoutCounterMax) { \n"\
-                           "    bool valid_read;\n"\
-                           "    auto val = IOPipeIn::read(valid_read);\n"\
-                           "    if (valid_read) {\n"\
-                           "        timeout_counter = 0;\n"\
-                           "        if (val == match_num) {\n"\
-                           "            DeviceToHostSideChannel::write(val);\n"\
-                           "    }\n"\
-                           "    IOPipeOut::write(val);\n"\
-                           "    } else {\n"\
-                           "        timeout_counter++;\n"\
+                           "  if (samples_processed == frame_size) samples_processed = 0; \n" \
+                           "  while (timeout_counter <= kTimeoutCounterMax) { \n" \
+                           "    bool valid_read;\n" \
+                           "    auto val = IOPipeIn::read(valid_read);\n" \
+                           "    if (valid_read) {\n" \
+                           "        timeout_counter = 0;\n" \
+                           "        if (val == match_num) {\n" \
+                           "            DeviceToHostSideChannel::write(val);\n" \
+                           "    }\n" \
+                           "    IOPipeOut::write(val);\n" \
+                           "    } else {\n" \
+                           "        timeout_counter++;\n" \
                            "    }\n" \
                            "  }\n" \
                            "  if (timeout_counter>=kTimeoutCounterMax){\n" \
                            "    bool flag=true;\n " \
                            "    " + self.channel_name + "::write(i,flag);\n " \
-                           "    channel_sum[3] = channel_sum[3] + 1;\n" \
-                           "  } \n"
-
+                                                        "    channel_sum[3] = channel_sum[3] + 1;\n" \
+                                                        "  } \n"
