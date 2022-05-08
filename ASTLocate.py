@@ -112,6 +112,29 @@ if __name__ == '__main__':
                 print(line)
                 inside_kernel_assert_location.append(i)
 
+    kernel_line_list = []
+    in_kernel_job_line_list = []
+    nearest_kernel_stack = []
+    nearest_kernel_number = inside_kernel_assert_location[0]
+    stack_list = []
+    flag_kernel = True
+    flag_job = True
+
+    f = open(original_code_path, "r")
+    for i, line in enumerate(f):
+        if line.find("q.submit"):
+            kernel_line_list.append(i)
+            if flag_kernel and (i > nearest_kernel_number):
+                stack_list.append(kernel_line_list[-2])
+                flag_kernel = False
+        if line.find("h."):
+            in_kernel_job_line_list.append(i)
+            if flag_job and (i > nearest_kernel_number):
+                stack_list.append(kernel_line_list[-2])
+                flag_job = False
+
+
+
     line_number_queue = [0, kernel_start[0], kernel_start[0] + 2, inside_kernel_assert_location[0], outside_kernel[0]]
 
     if target_type == "overflow":
