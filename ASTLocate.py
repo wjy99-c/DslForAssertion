@@ -4,7 +4,7 @@
 # @Author  : Jiyuan Wang
 # @File    : ASTLocate.py
 
-import sys
+import sys,os
 import clang.cindex
 import hardcoded_channel_pattern
 import rewrite
@@ -151,11 +151,10 @@ if __name__ == '__main__':
     elif target_type == "hang":
         trial = hardcoded_channel_pattern.HangPattern()
         rewrite.rewrite(line_number_queue, "example_program/arraysize1.cpp", "example_program/arraysize2.cpp", trial)
-    elif target_type == "memory":
-        trial = hardcoded_channel_pattern.HangPattern()
-        rewrite.rewrite(line_number_queue, "example_program/arraysize1.cpp", "example_program/arraysize2.cpp", trial)
     elif target_type == "valuecheck":
-        trial = hardcoded_channel_pattern.HangPattern()
+        trial = hardcoded_channel_pattern.ValueRangePattern(target_variable, target_ensure, target_requirement)
+    elif target_type == "latencycheck":
+        os.system('python3 report_latency.py')
     # rewrite.rewrite(line_number_queue, "example_program/overflow1.cpp", "example_program/overflow11.cpp", trial)
     # rewrite.rewrite(line_number_queue, "example_program/arraysize1.cpp", "example_program/arraysize2.cpp", trial)
     # rewrite.rewrite(line_number_queue, "example_program/overflow11.cpp", "example_program/channel1.cpp", trial)

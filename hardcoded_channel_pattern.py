@@ -163,3 +163,4 @@ class HangPattern(ChannelsCodePattern):
                            "    " + self.channel_name + "::write(timeout_counter,flag);\n " \
                                                         "    channel_sum[3] = channel_sum[3] + 1;\n" \
                                                         "  } \n"
+
