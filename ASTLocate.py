@@ -4,6 +4,8 @@
 # @Author  : Jiyuan Wang
 # @File    : ASTLocate.py
 
+#TODO snapshot undone for hang
+
 import sys,os
 import clang.cindex
 import hardcoded_channel_pattern

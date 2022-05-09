@@ -139,9 +139,13 @@ class ChannelSizePattern(ChannelsCodePattern):
 
 class HangPattern(ChannelsCodePattern):
 
-    def __init__(self):
+    def __init__(self, stack_list: []):
         channel_name = "MyDeviceToHostSideChannel_Hang"  # only check the channel hang
         super(HangPattern, self).__init__(channel_name, item=4)
+        stack_list_str = ""
+        for stack_call in stack_list:
+            stack_list_str = stack_list_str + self.channel_name + "::write("+str(stack_call)+",flag);\n "
+
         self.kernel_code = "  timeout_counter = 0; \n" \
                            "  if (samples_processed == frame_size) samples_processed = 0; \n" \
                            "  while (timeout_counter <= kTimeoutCounterMax) { \n" \
@@ -160,6 +164,7 @@ class HangPattern(ChannelsCodePattern):
                            "  if (timeout_counter>=kTimeoutCounterMax){\n" \
                            "    bool flag=true;\n " \
                            "    " + self.channel_name + "::write(i,flag);\n " \
+                           "    " + stack_list_str +\
                            "    " + self.channel_name + "::write(timeout_counter,flag);\n " \
                                                         "    channel_sum[3] = channel_sum[3] + 1;\n" \
                                                         "  } \n"
