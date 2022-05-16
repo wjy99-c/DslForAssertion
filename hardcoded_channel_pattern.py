@@ -147,7 +147,6 @@ class HangPattern(ChannelsCodePattern):
             stack_list_str = stack_list_str + self.channel_name + "::write("+str(stack_call)+",flag);\n "
 
         self.kernel_code = "  timeout_counter = 0; \n" \
-                           "  if (samples_processed == frame_size) samples_processed = 0; \n" \
                            "  while (timeout_counter <= kTimeoutCounterMax) { \n" \
                            "    bool valid_read;\n" \
                            "    auto val = IOPipeIn::read(valid_read);\n" \
