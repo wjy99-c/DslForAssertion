@@ -8,7 +8,6 @@ import re
 
 
 def id_different(s1, s2) -> bool:
-
     for cont in s1:
         if re.search('id":', cont) is not None:
             id1 =re.search(r"\d+\.?\d*", cont)
@@ -21,25 +20,33 @@ def id_different(s1, s2) -> bool:
         return True
 
 
-def return_keyword_str(s, key_word) -> int:
-    val = []
+def return_keyword_number(s, key_word) -> int:
     for conts in s:
         if re.search(key_word, conts) is not None:
-            val = re.match(r"\":\"*\"", conts)  # should search from start
-    return int(val[0])
+            val = re.findall(r"\d+\.?\d*", conts)
+            return int(val[0])
+    return 0
 
 
 if __name__ == '__main__':
     max_latency = 0
+    thre_latency = 100
     max_set = []
 
-    common_operator = []
+    operator_dict = {}
 
     with open("../viewer_data.js", 'r') as f:
         for line in f:
             x = re.split('{"name', line)
             for event in x:
                 y = re.split(",", event)
-                operator_name = return_keyword_str(y, "name")
+                operator_name = y[0]
+                number = return_keyword_number(y, 'Latency":"')
 
-    print(max_set)
+                if number > thre_latency:
+                    if operator_dict.get(operator_name) is not None:
+                        operator_dict[operator_name] += 1
+                    else:
+                        operator_dict[operator_name] = 1
+
+    print(operator_dict)
