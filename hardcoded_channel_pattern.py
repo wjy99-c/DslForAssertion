@@ -67,7 +67,6 @@ class OverflowPattern(ChannelsCodePattern):
                                                                                         "{\n" \
                                                                                         "   bool flag=true;\n " \
                                                                                         "   " + self.channel_name + "::write(i,flag);\n " \
-                                                                                                                    "    channel_sum[0] = channel_sum[0] + 1;\n" \
                                                                                                                     "} \n"
         # self.kernel_code = "if (not(" + requirements + ")){\n " \ "   bool flag=true;\n " \ "   " +
         # self.channel_name + "::write(i,flag);\n " \ "    channel_sum[0] = channel_sum[0] + 1;\n" \ "} \n"
